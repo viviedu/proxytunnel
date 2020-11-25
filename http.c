@@ -56,7 +56,7 @@ void analyze_HTTP(PTSTREAM *pts) {
 
 	p = strtok( NULL, " ");
 
-	if( strcmp( p, "200" ) != 0 ) {
+	if( strcmp( p, "200" ) != 0 && strcmp( p, "101" ) != 0 ) {
 		if( ! args_info.quiet_flag )
 			message( "HTTP return code: %s ", p );
 
@@ -168,12 +168,14 @@ void proxy_protocol(PTSTREAM *pts) {
 
 		if( args_info.verbose_flag )
 			message( "\nTunneling to %s (destination)\n", args_info.dest_arg );
-		sprintf( buf, "CONNECT %s HTTP/1.1\r\nHost: %s\r\n", args_info.dest_arg, args_info.host_arg ? args_info.host_arg : args_info.dest_arg);
+		sprintf( buf, "GET %s HTTP/1.1\r\nHost: %s\r\n", args_info.dest_arg, args_info.host_arg ? args_info.host_arg : args_info.dest_arg);
 
 		if ( args_info.remuser_given && args_info.rempass_given )
 			strzcat( buf, "Proxy-Authorization: Basic %s\r\n", basicauth(args_info.remuser_arg, args_info.rempass_arg ));
 
-		strzcat( buf, "Proxy-Connection: Keep-Alive\r\n");
+		//strzcat( buf, "Proxy-Connection: Keep-Alive\r\n");
+		strzcat( buf, "Connection: Upgrade\r\n");
+		strzcat( buf, "Upgrade: vivi/1\r\n");
 
 		/* Add extra header(s), headers are already \r\n terminated */
 		if ( args_info.header_given )
